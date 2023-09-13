@@ -1,4 +1,4 @@
-"""This module defines all entities which Foreman exposes.
+"""All entities which Foreman exposes.
 
 Each class in this module allows you to work with a certain set of logically
 related API paths exposed by the server. For example,
@@ -113,7 +113,6 @@ def _handle_response(response, server_config, synchronous=False, timeout=None):
     :param synchronous: Should this function poll the server?
     :param timeout: Maximum number of seconds to wait until timing out.
             Defaults to ``nailgun.entity_mixins.TASK_TIMEOUT``.
-
     """
     response.raise_for_status()
     if synchronous is True and response.status_code == ACCEPTED:
@@ -148,7 +147,6 @@ def _check_for_value(field_name, field_values):
     :raises: ``TypeError`` if ``field_name`` is not present in
         ``field_values``.
     :returns: Nothing.
-
     """
     if field_name not in field_values:
         raise TypeError(f'A value must be provided for the "{field_name}" field.')
@@ -162,7 +160,6 @@ def _get_org(server_config, label):
     :param label: A string. The label of the organization to find.
     :raises APIResponseError: If exactly one organization is not found.
     :returns: An :class:`nailgun.entities.Organization` object.
-
     """
     organizations = Organization(server_config).search(query={'search': f'label={label}'})
     if len(organizations) != 1:
@@ -189,14 +186,13 @@ def _get_version(server_config):
     :returns: A ``packaging.version.Version`` object. The version on
         ``server_config`` is returned if present, or a default version of '1!0'
         (epoch 1, version 0) otherwise.
-
     """
     return getattr(server_config, 'version', Version('1!0'))
 
 
 @lru_cache
 def _feature_list(server_config, smart_proxy_id=1):
-    """Get list of features enabled on capsule"""
+    """Get list of features enabled on capsule."""
     smart_proxy = SmartProxy(server_config, id=smart_proxy_id).read_json()
     return [feature['name'] for feature in smart_proxy['features']]
 
@@ -276,14 +272,14 @@ class ActivationKey(
         return super().path(which)
 
     def update_payload(self, fields=None):
-        """Always include organization_id."""
+        """Include organization_id in all payloads."""
         payload = super().update_payload(fields)
         # organization is required for the AK update call
         payload['organization_id'] = self.organization.id
         return payload
 
     def add_host_collection(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for associating host collection with activation key.
+        """Associate host collection with activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -302,7 +298,7 @@ class ActivationKey(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def add_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for adding subscriptions to activation key.
+        """Add subscriptions to activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -342,7 +338,7 @@ class ActivationKey(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def remove_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for removing subscriptions from an activation key.
+        """Remove subscriptions from an activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -361,7 +357,7 @@ class ActivationKey(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for retrieving subscriptions on an activation key.
+        """Retrieve subscriptions on an activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -399,7 +395,7 @@ class ActivationKey(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def product_content(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for showing content available for activation key.
+        """Show content available for activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -418,7 +414,7 @@ class ActivationKey(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def remove_host_collection(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for disassociating host collection from the activation key.
+        """Disassociate host collection from the activation key.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -482,7 +478,7 @@ class AlternateContentSource(
         super().__init__(server_config, **kwargs)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Handle read values dependencies"""
+        """Handle read values dependencies."""
         if attrs is None:
             attrs = self.read_json()
         if ignore is None:
@@ -541,7 +537,7 @@ class AlternateContentSource(
         return super().path(which)
 
     def refresh(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to refresh an ACS.
+        """Refresh an ACS.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -560,7 +556,7 @@ class AlternateContentSource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_refresh(self, synchronous=True, timeout=None, **kwargs):
-        """Refresh the set of ACSes
+        """Refresh the set of ACSes.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -578,7 +574,7 @@ class AlternateContentSource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_destroy(self, synchronous=True, timeout=None, **kwargs):
-        """Destroy the set of ACSes
+        """Destroy the set of ACSes.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -664,6 +660,7 @@ class ArfReport(Entity, EntityDeleteMixin, EntityReadMixin, EntitySearchMixin):
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         download_html
@@ -677,7 +674,7 @@ class ArfReport(Entity, EntityDeleteMixin, EntityReadMixin, EntitySearchMixin):
         return super().path(which)
 
     def download_html(self, synchronous=True, timeout=None, **kwargs):
-        """Download ARF report in HTML
+        """Download ARF report in HTML.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -848,7 +845,7 @@ class Capsule(Entity, EntityReadMixin, EntitySearchMixin):
         super().__init__(server_config, **kwargs)
 
     def content_add_lifecycle_environment(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to associate lifecycle environment with capsule
+        """Associate lifecycle environment with capsule.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -866,7 +863,7 @@ class Capsule(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def content_delete_lifecycle_environment(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to disassociate lifecycle environment from capsule
+        """Disassociate lifecycle environment from capsule.
 
         Here is an example of how to use this method::
             capsule.content_delete_lifecycle_environment(data={'environment_id': lce.id})
@@ -894,8 +891,7 @@ class Capsule(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def content_lifecycle_environments(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to get all the lifecycle environments, associated with
-        capsule
+        """Get all lifecycle environments associated with a capsule.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -913,7 +909,7 @@ class Capsule(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def content_sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to sync content on a capsule
+        """Sync content on a capsule.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -931,7 +927,7 @@ class Capsule(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def content_get_sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to get content sync status on capsule
+        """Get content sync status on capsule.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1093,6 +1089,7 @@ class AbstractComputeResource(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         available_images
@@ -1146,7 +1143,7 @@ class AbstractComputeResource(
         return self.read()
 
     def available_images(self, synchronous=True, timeout=None, **kwargs):
-        """Get images available to be added to the compute resource
+        """Get images available to be added to the compute resource.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1165,7 +1162,7 @@ class AbstractComputeResource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def available_zones(self, synchronous=True, timeout=None, **kwargs):
-        """Get images available to be added to the compute resource
+        """Get images available to be added to the compute resource.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1184,7 +1181,7 @@ class AbstractComputeResource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def available_flavors(self, synchronous=True, timeout=None, **kwargs):
-        """Get flavors available to be added to the compute resource
+        """Get flavors available to be added to the compute resource.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1203,7 +1200,7 @@ class AbstractComputeResource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def available_networks(self, synchronous=True, timeout=None, **kwargs):
-        """Get networks available to be selected for host provisioning
+        """Get networks available to be selected for host provisioning.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1222,7 +1219,7 @@ class AbstractComputeResource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def images(self, synchronous=True, timeout=None, **kwargs):
-        """Get images created in a compute resource
+        """Get images created in a compute resource.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1241,7 +1238,7 @@ class AbstractComputeResource(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def associate(self, synchronous=True, timeout=None, **kwargs):
-        """Associate the host
+        """Associate the host.
 
         :param kwargs: Arguments to pass to requests.
         :returns: The server's response, with all JSON decoded.
@@ -1324,7 +1321,7 @@ class DiscoveredHost(
         return {'discovered_host': super().update_payload(fields)}
 
     def facts(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to update facts for discovered host, and create the host.
+        """Update facts for discovered host, and create the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1343,7 +1340,7 @@ class DiscoveredHost(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def refresh_facts(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to refresh facts for discovered host
+        """Refresh facts for discovered host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1362,7 +1359,7 @@ class DiscoveredHost(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Make sure, everything except `id` and `name` are in the ignore list for read"""
+        """Make sure, everything except `id` and `name` are in the ignore list for read."""
         if ignore is None:
             ignore = set()
         ignore.add('ip')
@@ -1375,7 +1372,7 @@ class DiscoveredHost(
         return super().read(entity, attrs, ignore, params)
 
     def reboot(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to reboot the discovered host
+        """Reboot the discovered host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1394,7 +1391,7 @@ class DiscoveredHost(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def reboot_all(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for rebooting all discovered hosts
+        """Reboot all discovered hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1412,7 +1409,7 @@ class DiscoveredHost(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def auto_provision(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for auto-provisioning of the discovered host
+        """Auto-provision the discovered host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1430,7 +1427,7 @@ class DiscoveredHost(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def auto_provision_all(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for auto-provisioning of all discovered hosts
+        """Auto-provision of all discovered hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1460,7 +1457,6 @@ class DiscoveryRule(
 
     .. NOTE:: The ``search_`` field is named as such due to a naming conflict
         with :meth:`nailgun.entity_mixins.Entity.path`.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -1588,7 +1584,7 @@ class ExternalUserGroup(
         }
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore usergroup from read and alter auth_source_ldap with auth_source"""
+        """Ignore usergroup from read and alter auth_source_ldap with auth_source."""
         entity = entity or self.entity_with_parent()
         if ignore is None:
             ignore = set()
@@ -1665,7 +1661,7 @@ class LibvirtComputeResource(AbstractComputeResource):
 
 
 class OVirtComputeResource(AbstractComputeResource):
-    """A representation for compute resources with Ovirt provider"""
+    """A representation for compute resources with Ovirt provider."""
 
     def __init__(self, server_config=None, **kwargs):
         self._fields = {
@@ -1681,7 +1677,7 @@ class OVirtComputeResource(AbstractComputeResource):
         self._fields['provider_friendly_name'].default = 'OVirt'
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Make sure, ``password`` is in the ignore list for read"""
+        """Make sure, ``password`` is in the ignore list for read."""
         if ignore is None:
             ignore = set()
         ignore.add('password')
@@ -1689,7 +1685,7 @@ class OVirtComputeResource(AbstractComputeResource):
 
 
 class VMWareComputeResource(AbstractComputeResource):
-    """A representation for compute resources with Vmware provider"""
+    """A representation for compute resources with Vmware provider."""
 
     def __init__(self, server_config=None, **kwargs):
         self._fields = {
@@ -1704,7 +1700,7 @@ class VMWareComputeResource(AbstractComputeResource):
         self._fields['provider_friendly_name'].default = 'VMware'
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Make sure, ``password`` is in the ignore list for read"""
+        """Make sure, ``password`` is in the ignore list for read."""
         if ignore is None:
             ignore = set()
         ignore.add('password')
@@ -1725,7 +1721,7 @@ class GCEComputeResource(AbstractComputeResource):
         self._fields['provider_friendly_name'].default = 'GCE'
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Make sure, ``key_path`` is in the ignore list for read"""
+        """Make sure, ``key_path`` is in the ignore list for read."""
         if ignore is None:
             ignore = set()
         ignore.add('key_path')
@@ -1733,7 +1729,7 @@ class GCEComputeResource(AbstractComputeResource):
 
 
 class AzureRMComputeResource(AbstractComputeResource):
-    """A representation for compute resources with AzureRM provider"""
+    """A representation for compute resources with AzureRM provider."""
 
     def __init__(self, server_config=None, **kwargs):
         self._fields = {
@@ -1751,7 +1747,7 @@ class AzureRMComputeResource(AbstractComputeResource):
         self._fields['provider_friendly_name'].default = 'Azure Resource Manager'
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Make sure, ``secret_key`` is in the ignore list for read"""
+        """Make sure, ``secret_key`` is in the ignore list for read."""
         if ignore is None:
             ignore = set()
         ignore.add('secret_key')
@@ -1812,9 +1808,7 @@ class TemplateInput(
         }
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Create a JobTemplate object before calling read()
-        ignore 'advanced'
-        """
+        """Create a JobTemplate object before calling read, ignore 'advanced'."""
         entity = entity or self.entity_with_parent()
         if ignore is None:
             ignore = set()
@@ -1846,7 +1840,7 @@ class JobInvocation(Entity, EntityReadMixin, EntitySearchMixin):
         super().__init__(server_config, **kwargs)
 
     def run(self, synchronous=True, **kwargs):
-        """Helper to run existing job template
+        """Run an existing job template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -1919,7 +1913,6 @@ class JobTemplate(
 
     def create_payload(self):
         """Wrap submitted data within an extra dict."""
-
         payload = super().create_payload()
         effective_user = payload.pop('effective_user', None)
         if effective_user:
@@ -1937,8 +1930,10 @@ class JobTemplate(
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
         """Ignore the template inputs when initially reading the job template.
+
         Look up each TemplateInput entity separately
-        and afterwords add them to the JobTemplate entity."""
+        and afterwards add them to the JobTemplate entity.
+        """
         if attrs is None:
             attrs = self.read_json(params=params)
         if ignore is None:
@@ -2056,7 +2051,7 @@ class ProvisioningTemplate(
         return super().read(entity, attrs, ignore, params)
 
     def build_pxe_default(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to build pxe default template.
+        """Build pxe default template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2074,7 +2069,7 @@ class ProvisioningTemplate(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def clone(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to clone an existing provision template
+        """Clone an existing provision template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2157,7 +2152,7 @@ class ReportTemplate(
         return super().path(which)
 
     def clone(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to clone an existing report template
+        """Clone an existing report template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2175,7 +2170,7 @@ class ReportTemplate(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def generate(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to generate an existing report template
+        """Generate an existing report template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2193,7 +2188,7 @@ class ReportTemplate(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def schedule_report(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to schedule an existing report template
+        """Schedule an existing report template.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2211,7 +2206,7 @@ class ReportTemplate(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def report_data(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to call report_data on an existing scheduled report
+        """Call report_data on an existing scheduled report.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2438,7 +2433,7 @@ class ContentViewVersion(Entity, EntityDeleteMixin, EntityReadMixin, EntitySearc
         return super().path(which)
 
     def incremental_update(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for incrementally updating a content view version.
+        """Incrementally update a content view version.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2457,7 +2452,7 @@ class ContentViewVersion(Entity, EntityDeleteMixin, EntityReadMixin, EntitySearc
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def promote(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for promoting an existing published content view.
+        """Promote an existing published content view.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2768,7 +2763,7 @@ class ContentView(
         return super().path(which)
 
     def publish(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for publishing an existing content view.
+        """Publish an existing content view.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -2852,10 +2847,9 @@ class ContentViewComponent(Entity, EntityReadMixin, EntityUpdateMixin):
         }
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """
-        Add composite_content_view to the response if needed, as
-        :meth:`nailgun.entity_mixins.EntityReadMixin.read` can't initialize
-        composite_content_view.
+        """Add composite_content_view to the response if needed.
+
+        :meth:`nailgun.entity_mixins.EntityReadMixin.read` can't initialize composite_content_view.
         """
         if attrs is None:
             attrs = self.read_json()
@@ -2868,6 +2862,7 @@ class ContentViewComponent(Entity, EntityReadMixin, EntityUpdateMixin):
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         add
@@ -2906,7 +2901,7 @@ class ContentViewComponent(Entity, EntityReadMixin, EntityUpdateMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def remove(self, synchronous=True, timeout=None, **kwargs):
-        """remove provided Content View Component.
+        """Remove provided Content View Component.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3065,6 +3060,7 @@ class Environment(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         smart_class_parameters
@@ -3078,7 +3074,7 @@ class Environment(
         return super().path(which)
 
     def list_scparams(self, synchronous=True, timeout=None, **kwargs):
-        """List all smart class parameters
+        """List all smart class parameters.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3128,7 +3124,7 @@ class Errata(Entity, EntityReadMixin, EntitySearchMixin):
         super().__init__(server_config, **kwargs)
 
     def compare(self, synchronous=True, timeout=None, **kwargs):
-        """Compare errata from different content view versions
+        """Compare errata from different content view versions.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3162,9 +3158,12 @@ class Errata(Entity, EntityReadMixin, EntitySearchMixin):
         return super().path(which)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Following fields are only accessible for filtering search results
-        and are never returned by the server: ``content_view_version_id``,
-        ``environment_id``, ``repository_id``.
+        """Read errata from the server.
+
+        Following fields are only accessible for filtering search results
+        and are never returned by the server:
+
+        ``content_view_version_id``, ``environment_id``, ``repository_id``.
         """
         if ignore is None:
             ignore = set()
@@ -3222,7 +3221,7 @@ class Filter(
         return {'filter': super().create_payload()}
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Deal with different named data returned from the server"""
+        """Deal with different named data returned from the server."""
         if attrs is None:
             attrs = self.read_json()
         attrs['override'] = attrs.pop('override?')
@@ -3325,7 +3324,7 @@ class ForemanTask(Entity, EntityReadMixin, EntitySearchMixin):
         return _poll_task(self.id, self._server_config, poll_rate, timeout, must_succeed)
 
     def summary(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to view a summary of tasks.
+        """View a summary of tasks.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3344,7 +3343,7 @@ class ForemanTask(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_cancel(self, synchronous=True, timeout=None, **kwargs):
-        """Cancels the task(s).
+        """Cancel the task(s).
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3610,6 +3609,7 @@ class HostGroup(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         clone
@@ -3640,7 +3640,7 @@ class HostGroup(
         return super().path(which)
 
     def add_puppetclass(self, synchronous=True, timeout=None, **kwargs):
-        """Add a Puppet class to host group
+        """Add a Puppet class to host group.
 
         Here is an example of how to use this method::
             hostgroup.add_puppetclass(data={'puppetclass_id': puppet.id})
@@ -3662,7 +3662,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def delete_puppetclass(self, synchronous=True, timeout=None, **kwargs):
-        """Remove a Puppet class from host group
+        """Remove a Puppet class from host group.
 
         Here is an example of how to use this method::
             hostgroup.delete_puppetclass(data={'puppetclass_id': puppet.id})
@@ -3689,7 +3689,7 @@ class HostGroup(
         )
 
     def list_scparams(self, synchronous=True, timeout=None, **kwargs):
-        """List all smart class parameters
+        """List all smart class parameters.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3708,7 +3708,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def clone(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to clone an existing host group
+        """Clone an existing host group.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3726,7 +3726,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def rebuild_config(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to 'Rebuild orchestration config' of an existing host group
+        """Rebuild orchestration config of an existing host group.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3744,7 +3744,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def assign_ansible_roles(self, synchronous=True, timeout=None, **kwargs):
-        """Add an Ansible Role to a hostgroup
+        """Add an Ansible Role to a hostgroup.
 
         Here is an example of how to use this method::
             hostgroup.assign_ansible_roles(data={'ansible_role_ids':
@@ -3767,7 +3767,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def list_ansible_roles(self, synchronous=True, timeout=None, **kwargs):
-        """List all Ansible Roles assigned to a hostgroup
+        """List all Ansible Roles assigned to a hostgroup.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3786,7 +3786,7 @@ class HostGroup(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def add_ansible_role(self, synchronous=True, timeout=None, **kwargs):
-        """Add single Ansible Role to a hostgroup
+        """Add single Ansible Role to a hostgroup.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3806,7 +3806,7 @@ class HostGroup(
         )
 
     def remove_ansible_role(self, synchronous=True, timeout=None, **kwargs):
-        """Remove single Ansible Role assigned to a hostgroup
+        """Remove single Ansible Role assigned to a hostgroup.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3876,7 +3876,7 @@ class HostSubscription(Entity):
         return super().path(which)
 
     def subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for getting subscriptions from host
+        """Get subscriptions from host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3895,7 +3895,7 @@ class HostSubscription(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def add_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for adding subscriptions to host
+        """Add subscriptions to host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -3914,7 +3914,7 @@ class HostSubscription(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def remove_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for removing subscriptions from host
+        """Remove subscriptions from host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4197,7 +4197,7 @@ class Host(
         ).read()
 
     def enc(self, synchronous=True, timeout=None, **kwargs):
-        """Return external node classifier (ENC) information
+        """Return external node classifier (ENC) information.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4215,7 +4215,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def errata(self, synchronous=True, timeout=None, **kwargs):
-        """List errata available for the host
+        """List errata available for the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4234,7 +4234,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def traces(self, synchronous=True, timeout=None, **kwargs):
-        """List services that need restarting for the host
+        """List services that need restarting for the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4252,7 +4252,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_traces(self, synchronous=True, timeout=None, **kwargs):
-        """List services that need restarting for the specified set of hosts
+        """List services that need restarting for the specified set of hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4270,7 +4270,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def resolve_traces(self, synchronous=True, timeout=None, **kwargs):
-        """Resolve traces for the host
+        """Resolve traces for the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4288,7 +4288,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_resolve_traces(self, synchronous=True, timeout=None, **kwargs):
-        """Resolve traces for the specified set of hosts
+        """Resolve traces for the specified set of hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4306,7 +4306,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_destroy(self, synchronous=True, timeout=None, **kwargs):
-        """Destroy the set of hosts
+        """Destroy the set of hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4324,7 +4324,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def packages(self, synchronous=True, timeout=None, **kwargs):
-        """List packages installed on the host
+        """List packages installed on the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4342,7 +4342,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def module_streams(self, synchronous=True, timeout=None, **kwargs):
-        """List module_streams available for the host
+        """List module_streams available for the host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4361,7 +4361,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def errata_applicability(self, synchronous=True, timeout=None, **kwargs):
-        """Force regenerate errata applicability
+        """Force regenerate errata applicability.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4380,7 +4380,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def errata_apply(self, synchronous=True, timeout=None, **kwargs):
-        """Schedule errata for installation
+        """Schedule errata for installation.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4399,7 +4399,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def install_content(self, synchronous=True, timeout=None, **kwargs):
-        """Install content on one or more hosts
+        """Install content on one or more hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4418,7 +4418,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_add_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Add subscriptions to one or more hosts
+        """Add subscriptions to one or more hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4437,7 +4437,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_remove_subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Remove subscriptions from one or more hosts
+        """Remove subscriptions from one or more hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4456,7 +4456,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def bulk_available_incremental_updates(self, synchronous=True, timeout=None, **kwargs):
-        """Get available_incremental_updates for one or more hosts
+        """Get available_incremental_updates for one or more hosts.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4475,7 +4475,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def get_facts(self, synchronous=True, timeout=None, **kwargs):
-        """List all fact values of a given host
+        """List all fact values of a given host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4494,7 +4494,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def upload_facts(self, synchronous=True, timeout=None, **kwargs):
-        """Upload facts for a host, creating the host if required
+        """Upload facts for a host, creating the host if required.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4610,6 +4610,7 @@ class Host(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         bulk/install_content
@@ -4673,7 +4674,7 @@ class Host(
         return super().path(which)
 
     def add_puppetclass(self, synchronous=True, timeout=None, **kwargs):
-        """Add a Puppet class to host
+        """Add a Puppet class to host.
 
         Here is an example of how to use this method::
             host.add_puppetclass(data={'puppetclass_id': puppet.id})
@@ -4695,7 +4696,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def delete_puppetclass(self, synchronous=True, timeout=None, **kwargs):
-        """Remove a Puppet class from host
+        """Remove a Puppet class from host.
 
         Here is an example of how to use this method::
             host.delete_puppetclass(data={'puppetclass_id': puppet.id})
@@ -4722,7 +4723,7 @@ class Host(
         )
 
     def read_template(self, synchronous=True, timeout=None, **kwargs):
-        """Fetches and reads the provisioning template for given host
+        """Fetch and read the provisioning template for given host.
 
         Here is an example of how to use this method::
             host.read_template(data={'template_kind': 'iPXE'})
@@ -4749,7 +4750,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def list_scparams(self, synchronous=True, timeout=None, **kwargs):
-        """List all smart class parameters
+        """List all smart class parameters.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4768,7 +4769,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def power(self, synchronous=True, timeout=None, **kwargs):
-        """Power the host off or on
+        """Power the host off or on.
 
         :param kwargs: Arguments to pass to requests.
         :returns: The server's response, with all JSON decoded.
@@ -4815,7 +4816,7 @@ class Host(
         return entities
 
     def disassociate(self, synchronous=True, timeout=None, **kwargs):
-        """Disassociate the host
+        """Disassociate the host.
 
         :param kwargs: Arguments to pass to requests.
         :returns: The server's response, with all JSON decoded.
@@ -4829,7 +4830,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def assign_ansible_roles(self, synchronous=True, timeout=None, **kwargs):
-        """Add an Ansible Role to a host
+        """Add an Ansible Role to a host.
 
         Here is an example of how to use this method::
             host.assign_ansible_roles(data={'ansible_role_ids':
@@ -4852,7 +4853,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def list_ansible_roles(self, synchronous=True, timeout=None, **kwargs):
-        """List all Ansible Roles assigned to a Host
+        """List all Ansible Roles assigned to a Host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4871,7 +4872,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def add_ansible_role(self, synchronous=True, timeout=None, **kwargs):
-        """Add single Ansible Role to a host
+        """Add single Ansible Role to a host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4891,7 +4892,7 @@ class Host(
         )
 
     def remove_ansible_role(self, synchronous=True, timeout=None, **kwargs):
-        """Remove single Ansible Role assigned to a host
+        """Remove single Ansible Role assigned to a host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4911,7 +4912,7 @@ class Host(
         )
 
     def play_ansible_roles(self, synchronous=True, timeout=None, **kwargs):
-        """Play all assigned ansible roles on a Host
+        """Play all assigned ansible roles on a Host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -4930,7 +4931,7 @@ class Host(
         return _handle_response(response, self._server_config, synchronous, timeout)['task_id']
 
     def list_provisioning_templates(self, synchronous=True, timeout=None, **kwargs):
-        """List all Provisioning templates assigned to a Host
+        """List all Provisioning templates assigned to a Host.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -5117,9 +5118,7 @@ class Interface(
         return super().read(entity, attrs, ignore, params)
 
     def search_normalize(self, results):
-        """Append host id to search results to be able to initialize found
-        :class:`Interface` successfully
-        """
+        """Append host id to search results to initialize found :class:`Interface` successfully."""
         for interface in results:
             interface['host_id'] = self.host.id
         return super().search_normalize(results)
@@ -5219,6 +5218,7 @@ class HTTPProxy(
 
     def create_payload(self):
         """Wrap submitted data within an extra dict.
+
         For more information, see `Bugzilla #1151220
         <https://bugzilla.redhat.com/show_bug.cgi?id=1151220>`_.
         """
@@ -5226,6 +5226,7 @@ class HTTPProxy(
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
         """Make sure, password, organization and location is in the ignore list for read.
+
         For more information, see `Bugzilla #1779642
         <https://bugzilla.redhat.com/show_bug.cgi?id=1779642>`_.
         """
@@ -5329,7 +5330,6 @@ class Media(
 
     .. NOTE:: The ``path_`` field is named as such due to a naming conflict
         with :meth:`nailgun.entity_mixins.Entity.path`.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -5484,7 +5484,6 @@ class OperatingSystemParameter(Entity, EntityCreateMixin, EntityDeleteMixin, Ent
     ``organization`` must be passed in when this entity is instantiated.
 
     :raises: ``TypeError`` if ``operatingsystem`` is not passed in.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -5709,7 +5708,7 @@ class Organization(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def repo_discover(self, synchronous=True, timeout=None, **kwargs):
-        """repo discovery.
+        """Repo discovery.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -5763,7 +5762,7 @@ class Organization(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def subscriptions(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for getting subscriptions from organization.
+        """Get subscriptions from organization.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -5798,7 +5797,7 @@ class Organization(
             tarfile.write(response.content)
 
     def rh_cloud_generate_report(self, synchronous=True, timeout=None, **kwargs):
-        """Start RHCloud Inventory report generation process
+        """Start RHCloud Inventory report generation process.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -5817,7 +5816,7 @@ class Organization(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def rh_cloud_inventory_sync(self, synchronous=True, timeout=None, **kwargs):
-        """Start inventory synchronization
+        """Start inventory synchronization.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -5862,6 +5861,7 @@ class OSDefaultTemplate(
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
         """Fetch as many attributes as possible for this entity.
+
         Since operatingsystem is needed to instanciate, prepare the entity
         accordingly.
         """
@@ -5872,8 +5872,9 @@ class OSDefaultTemplate(
         return super().read(entity, attrs, ignore, params)
 
     def update_payload(self, fields=None):
-        """Wrap payload in ``os_default_template``
-        relates to `Redmine #21169`_.
+        """Wrap payload in ``os_default_template``.
+
+        Relates to `Redmine #21169`_.
 
         .. _Redmine #21169: http://projects.theforeman.org/issues/21169
         """
@@ -5907,7 +5908,7 @@ class OverrideValue(
         }
 
     def create_payload(self):
-        """Remove ``smart_class_parameter_id``"""
+        """Remove ``smart_class_parameter_id``."""
         payload = super().create_payload()
         if hasattr(self, 'smart_class_parameter'):
             del payload['smart_class_parameter_id']
@@ -5976,7 +5977,9 @@ class Parameter(Entity, EntityCreateMixin, EntityDeleteMixin, EntityReadMixin, E
         }
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore path related fields as they're never returned by the server
+        """Read parameter from server.
+
+        Ignore path related fields as they're never returned by the server
         and are only added to entity to be able to use proper path.
         """
         entity = entity or self.entity_with_parent(**{self._parent_type: self._parent_id})
@@ -6086,7 +6089,7 @@ class Product(
         return result
 
     def search(self, fields=None, query=None, filters=None):
-        """Search for entities with missing attribute
+        """Search for entities with missing attribute.
 
         :param fields: A set naming which fields should be used when generating
             a search query. If ``None``, all values on the entity are used. If
@@ -6173,7 +6176,7 @@ class ProductBulkAction(Entity):
         return super().path(which)
 
     def destroy(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to destroy one or more products.
+        """Destroy one or more products.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6192,7 +6195,7 @@ class ProductBulkAction(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to sync one or more products.
+        """Sync one or more products.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6211,7 +6214,7 @@ class ProductBulkAction(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def http_proxy(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to update the http proxy configuration on the repositories of one or more products.
+        """Update the http proxy configuration on the repositories of one or more products.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6230,7 +6233,7 @@ class ProductBulkAction(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def sync_plan(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to sync one or more products.
+        """Sync one or more products.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6265,7 +6268,6 @@ class PartitionTable(
 
     Note: Having a name length of 2 had failures again.  Updating the length to
     4.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -6307,7 +6309,8 @@ class PuppetClass(
         super().__init__(server_config, **kwargs)
 
     def search_normalize(self, results):
-        """Flattens results.
+        """Flatten results.
+
         :meth:`nailgun.entity_mixins.EntitySearchMixin.search_normalize`
         expects structure like
         list(dict_1(name: class_1), dict_2(name: class_2)),
@@ -6319,6 +6322,7 @@ class PuppetClass(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         smart_class_parameters
@@ -6332,7 +6336,7 @@ class PuppetClass(
         return super().path(which)
 
     def list_scparams(self, synchronous=True, timeout=None, **kwargs):
-        """List of smart class parameters for a specific Puppet class
+        """List of smart class parameters for a specific Puppet class.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6509,7 +6513,7 @@ class RecurringLogic(Entity, EntityReadMixin):
         super().__init__(server_config, **kwargs)
 
     def cancel(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for canceling a recurring logic
+        """Cancel a recurring logic.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6529,6 +6533,7 @@ class RecurringLogic(Entity, EntityReadMixin):
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.RecurringLogic.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         cancel
@@ -6573,8 +6578,9 @@ class RegistrationCommand(Entity, EntityCreateMixin, EntityReadMixin):
         super().__init__(server_config, **kwargs)
 
     def create_payload(self):
-        """Wrap submitted data within an extra dict. In addition,
-        rename the ``activation_keys_ids`` field to ``activation_keys``.
+        """Wrap submitted data within an extra dict.
+
+        In addition, rename the ``activation_keys_ids`` field to ``activation_keys``.
 
         """
         payload = super().create_payload()
@@ -6583,8 +6589,10 @@ class RegistrationCommand(Entity, EntityCreateMixin, EntityReadMixin):
         return payload
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
-        all the fields and returns 'registration_command' output in dict
+        """Read registration command from server.
+
+        Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
+        all the fields and returns 'registration_command' output in dict.
         """
         if attrs is None:
             attrs = self.read_json()
@@ -6713,7 +6721,9 @@ class Repository(
         return super().path(which)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore ``organization`` field as it's never returned by the server
+        """Read repository from server.
+
+        Ignore ``organization`` field as it's never returned by the server
         and is only added to entity to be able to use organization path
         dependent helpers and also upstream_password as it is not returned
         for security reasons.
@@ -6756,7 +6766,7 @@ class Repository(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for syncing an existing repository.
+        """Sync an existing repository.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6826,7 +6836,7 @@ class Repository(
         timeout=None,
         **kwargs,
     ):
-        """Import uploads into a repository
+        """Import uploads into a repository.
 
         It expects either a list of uploads or upload_ids (but not both).
 
@@ -6856,7 +6866,7 @@ class Repository(
         return json
 
     def remove_content(self, synchronous=True, timeout=None, **kwargs):
-        """Remove content from a repository
+        """Remove content from a repository.
 
         It expects content/packages/docker manifests ids sent as data.
         Here is an example of how to use this method::
@@ -6880,7 +6890,7 @@ class Repository(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def packages(self, synchronous=True, timeout=None, **kwargs):
-        """List packages associated with repository
+        """List packages associated with repository.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6899,7 +6909,7 @@ class Repository(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def module_streams(self, synchronous=True, timeout=None, **kwargs):
-        """List module_streams associated with repository
+        """List module_streams associated with repository.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6918,7 +6928,7 @@ class Repository(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def files(self, synchronous=True, timeout=None, **kwargs):
-        """List files associated with repository
+        """List files associated with repository.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -6938,7 +6948,7 @@ class Repository(
 
 
 class RepositorySet(Entity, EntityReadMixin, EntitySearchMixin):
-    """A representation of a Repository Set entity"""
+    """A representation of a Repository Set entity."""
 
     def __init__(self, server_config=None, **kwargs):
         self._fields = {
@@ -6967,13 +6977,12 @@ class RepositorySet(Entity, EntityReadMixin, EntitySearchMixin):
         }
 
     def available_repositories(self, **kwargs):
-        """Lists available repositories for the repository set
+        """List available repositories for the repository set.
 
         :param kwargs: Arguments to pass to requests.
         :returns: The server's response, with all JSON decoded.
         :raises: ``requests.exceptions.HTTPError`` If the server responds with
             an HTTP 4XX or 5XX message.
-
         """
         if 'data' not in kwargs:
             kwargs['data'] = {}
@@ -6984,9 +6993,9 @@ class RepositorySet(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config)
 
     def enable(self, synchronous=True, timeout=None, **kwargs):
-        """Enables the RedHat Repository
+        """Enable a RedHat Repository.
 
-        RedHat Repos needs to be enabled first, so that we can sync it.
+        RedHat repos needs to be enabled first, so that we can sync it.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -7008,7 +7017,7 @@ class RepositorySet(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def disable(self, synchronous=True, timeout=None, **kwargs):
-        """Disables the RedHat Repository
+        """Disables a RedHat Repository.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -7181,7 +7190,7 @@ class RHCloud(Entity):
         return super().path(which)
 
     def enable_connector(self, synchronous=True, timeout=None, **kwargs):
-        """Function to enable RH Cloud connector"""
+        """Enable RH Cloud connector."""
         kwargs = kwargs.copy()
         kwargs.update(self._server_config.get_client_kwargs())
         kwargs['data'] = {}
@@ -7248,6 +7257,7 @@ class Role(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         clone
@@ -7261,7 +7271,7 @@ class Role(
         return super().path(which)
 
     def clone(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to clone an existing Role
+        """Clone an existing Role.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -7298,8 +7308,10 @@ class Setting(Entity, EntityReadMixin, EntitySearchMixin, EntityUpdateMixin):
         super().__init__(server_config, **kwargs)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
-        the ``created_at and updated_at``
+        """Read setting from server.
+
+        Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
+        the ``created_at and updated_at``.
         """
         if ignore is None:
             ignore = set()
@@ -7342,6 +7354,7 @@ class SmartProxy(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         refresh
@@ -7355,7 +7368,7 @@ class SmartProxy(
         return super().path(which)
 
     def refresh(self, synchronous=True, timeout=None, **kwargs):
-        """Refresh Capsule features
+        """Refresh Capsule features.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -7404,8 +7417,7 @@ class SmartProxy(
         )
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore ``download_policy`` field as it's never returned by the
-        server.
+        """Ignore ``download_policy`` field as it's never returned by the server.
 
         For more information, see `Bugzilla #1486609
         <https://bugzilla.redhat.com/show_bug.cgi?id=1486609>`_.
@@ -7477,6 +7489,7 @@ class Snapshot(
     EntityUpdateMixin,
 ):
     """A representation of a Snapshot entity.
+
     Foreman_snapshot as mentioned in the plugin:
     https://github.com/ATIX-AG/foreman_snapshot_management
     # Read Snapshot
@@ -7490,7 +7503,7 @@ class Snapshot(
     # Revert Snapshot
     Snapshot(host=<host_id>, id=<snapshot_id>).revert()
     # Delete Snapshot
-    Snapshot(host=<host_id>, id=<snapshot_id>).delete()
+    Snapshot(host=<host_id>, id=<snapshot_id>).delete().
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -7507,8 +7520,9 @@ class Snapshot(
 
     def path(self, which=None):
         """Extend nailgun.entity_mixins.Entity.path.
+
         revert
-        /api/v2/hosts/<host-id>/snapshots/<snapshot-id>/revert
+        /api/v2/hosts/<host-id>/snapshots/<snapshot-id>/revert.
         """
         if which == "revert":
             return f'{super().path(which="self")}/{which}'
@@ -7539,20 +7553,16 @@ class Snapshot(
         return super().read(entity, attrs, ignore, params)
 
     def search_normalize(self, results):
-        """Append host id to search results to be able to initialize found
-        :class:`Snapshot` successfully
-        """
-
+        """Append host id to search results to initialize found :class:`Snapshot` successfully."""
         for snapshot in results:
             snapshot['host_id'] = self.host.id
         return super().search_normalize(results)
 
     def revert(self, **kwargs):
-        """Rollbacks the Snapshot
+        """Rollback the Snapshot.
 
         Makes HTTP PUT call to revert the snapshot.
         """
-
         kwargs.update(self._server_config.get_client_kwargs())
         response = client.put(self.path('revert'), **kwargs)
         return _handle_response(response, self._server_config)
@@ -7564,7 +7574,6 @@ class SSHKey(Entity, EntityCreateMixin, EntityDeleteMixin, EntityReadMixin, Enti
     ``user`` must be passed in when this entity is instantiated.
 
     :raises: ``TypeError`` if ``user`` is not passed in.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -7603,9 +7612,7 @@ class SSHKey(Entity, EntityCreateMixin, EntityDeleteMixin, EntityReadMixin, Enti
         return super().read(entity, attrs, ignore, params)
 
     def search_normalize(self, results):
-        """Append user id to search results to be able to initialize found
-        :class:`User` successfully
-        """
+        """Append user id to search results to initialize found :class:`User` successfully."""
         for sshkey in results:
             sshkey['user_id'] = self.user.id
         return super().search_normalize(results)
@@ -7764,7 +7771,7 @@ class Subscription(Entity, EntityReadMixin, EntitySearchMixin):
         return super().path(which)
 
     def _org_path(self, which, payload):
-        """A helper method for generating paths with organization IDs in them.
+        """Generate paths with organization IDs in them.
 
         :param which: A path such as "manifest_history" that has an
             organization ID in it.
@@ -7821,7 +7828,9 @@ class Subscription(Entity, EntityReadMixin, EntitySearchMixin):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore ``organization`` field as it's never returned by the server
+        """Read subscription from server.
+
+        Ignore ``organization`` field as it's never returned by the server
         and is only added to entity to be able to use organization path
         dependent helpers.
         """
@@ -7899,7 +7908,6 @@ class SyncPlan(
     ``organization`` must be passed in when this entity is instantiated.
 
     :raises: ``TypeError`` if ``organization`` is not passed in.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -8115,7 +8123,7 @@ class Template(Entity):
         return super().path(which)
 
     def imports(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to import templates
+        """Import templates.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8133,7 +8141,7 @@ class Template(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def exports(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to export templates
+        """Export templates.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8173,7 +8181,6 @@ class TemplateKind(Entity, EntityReadMixin, EntitySearchMixin):
     """A representation of a Template Kind entity.
 
     Unusually, the ``/api/v2/template_kinds/:id`` path is totally unsupported.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -8276,7 +8283,6 @@ class User(
     guaranteed to exist and be functioning. Thus, ``auth_source`` is set to "1"
     by default for a practical reason: it is much easier to use internal
     authentication than to spawn LDAP authentication servers for each new user.
-
     """
 
     def __init__(self, server_config=None, **kwargs):
@@ -8418,19 +8424,15 @@ class VirtWhoConfig(
         return super().path(which)
 
     def create_payload(self):
-        """
-        Wraps config in extra dict
-        """
+        """Wrap config in extra dict."""
         return {'foreman_virt_who_configure_config': super().create_payload()}
 
     def update_payload(self, fields=None):
-        """
-        Wraps config in extra dict
-        """
+        """Wrap config in extra dict."""
         return {'foreman_virt_who_configure_config': super().update_payload(fields)}
 
     def deploy_script(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for Config's deploy_script method.
+        """Deploy script for a VirtWho Config.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8449,9 +8451,10 @@ class VirtWhoConfig(
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """
+        """Read subscription from server.
+
         Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
-        the ``hypervisor_password``
+        the ``hypervisor_password``.
         """
         if not ignore:
             ignore = set()
@@ -8460,7 +8463,8 @@ class VirtWhoConfig(
         return super().read(entity, attrs, ignore, params)
 
     def get_organization_configs(self, synchronous=True, timeout=None, **kwargs):
-        """
+        """Get all virt-who configurations per organization.
+
         Unusually, the ``/foreman_virt_who_configure/api/v2/organizations/
         :organization_id/configs`` path is totally unsupported.
         Support to List of virt-who configurations per organization.
@@ -8521,8 +8525,10 @@ class ScapContents(
         ).read()
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
-        the ``scap_file``
+        """Read subscription from server.
+
+        Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
+        the ``scap_file``.
         """
         if ignore is None:
             ignore = set()
@@ -8531,6 +8537,7 @@ class ScapContents(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         xml
@@ -8549,7 +8556,7 @@ class ScapContents(
         return self.read()
 
     def xml(self, synchronous=True, timeout=None, **kwargs):
-        """Download an SCAP content as XML
+        """Download an SCAP content as XML.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8623,7 +8630,8 @@ class Webhooks(
         super().__init__(server_config, **kwargs)
 
     def create(self, create_missing=None):
-        """Overrides creation of Webhooks
+        """Override creation of Webhooks.
+
         Before creating the Webhook, we want to call
         get_events to get a valid list of events to pass
         into our POST call.
@@ -8636,8 +8644,10 @@ class Webhooks(
         ).read()
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
-        the ``webhook_template_id``, ``password``, and ``proxy_authorization``
+        """Read subscription from server.
+
+        Override :meth:`nailgun.entity_mixins.EntityReadMixin.read` to ignore
+        the ``webhook_template_id``, ``password``, and ``proxy_authorization``.
         """
         if ignore is None:
             ignore = set()
@@ -8648,6 +8658,7 @@ class Webhooks(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         events
@@ -8661,7 +8672,9 @@ class Webhooks(
         return super().path(which)
 
     def get_events(self, synchronous=True, timeout=None, **kwargs):
-        """GET api/webhooks/events returns the list of all valid events
+        """Get all valid events for a Webhook.
+
+        GET api/webhooks/events returns the list of all valid events
         we can use to create a Webhook. Calling this list before our create
         allows us to test all possible events.
 
@@ -8692,6 +8705,7 @@ class AnsiblePlaybooks(Entity):
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         fetch
@@ -8707,7 +8721,7 @@ class AnsiblePlaybooks(Entity):
         return super().path(which)
 
     def fetch(self, synchronous=True, timeout=None, **kwargs):
-        """Helper for fetching all ansible playbooks.
+        """Fetch all ansible playbooks.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8726,7 +8740,7 @@ class AnsiblePlaybooks(Entity):
         return _handle_response(response, self._server_config, synchronous, timeout)
 
     def sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to sync ansible playbooks.
+        """Sync ansible playbooks.
 
         :param synchronous: What should happen if the server returns an HTTP
             202 (accepted) status code? Wait for the task to complete if
@@ -8763,6 +8777,7 @@ class AnsibleRoles(
 
     def path(self, which=None):
         """Extend ``nailgun.entity_mixins.Entity.path``.
+
         The format of the returned path depends on the value of ``which``:
 
         sync
@@ -8776,7 +8791,7 @@ class AnsibleRoles(
         return super().path(which)
 
     def sync(self, synchronous=True, timeout=None, **kwargs):
-        """Helper to sync ansible roles from a proxy.
+        """Sync ansible roles from a proxy.
 
         AnsibleRoles.sync(data={'proxy_id': "target_sat.ip", 'role_names': ["role_name"]})
 
@@ -8831,7 +8846,9 @@ class TablePreferences(
         super().__init__(server_config, **kwargs)
 
     def read(self, entity=None, attrs=None, ignore=None, params=None):
-        """Ignore path related fields as they're never returned by the server
+        """Read table preferences from server.
+
+        Ignore path related fields as they're never returned by the server
         and are only added to entity to be able to use proper path.
         """
         entity = entity or self.entity_with_parent(user=self.user)
@@ -8842,6 +8859,7 @@ class TablePreferences(
 
     def search(self, fields=None, query=None, filters=None):
         """List/search for TablePreferences.
+
         Field 'user' is only used for path and is not returned.
         """
         return super().search(
